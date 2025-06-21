@@ -91,26 +91,42 @@ async function loadVideos(playlistName) {
 
 // 🎞 Render Video Cards
 function renderVideos(playlistName, videos) {
-  // Append to existing (for search), not always overwrite
   const container = document.createElement("div");
 
   videos.forEach((video, index) => {
     const title = video?.title || "Untitled";
     const url = video?.url || "";
     const likes = video?.likes || 0;
+    const restricted = video?.restricted || false;
 
     const likedKey = `liked-${playlistName}-${index}`;
     const isLiked = localStorage.getItem(likedKey) === "true";
 
     const card = document.createElement("div");
     card.className = "video-card";
-    card.innerHTML = `
-      <video controls src="${url}" preload="metadata"></video>
-      <h3>${title}</h3>
-      <button class="like-btn ${isLiked ? 'liked' : ''}" data-index="${index}" data-playlist="${playlistName}">
-        👍 ${likes}
-      </button>
-    `;
+
+    if (restricted && !checkAgeVerified()) {
+      card.innerHTML = `
+        <div class="restricted-card">
+          🔞 This content is age-restricted.
+          <br><br>
+          <button class="verify-age-btn">I'm 18+</button>
+        </div>
+      `;
+      card.querySelector(".verify-age-btn").addEventListener("click", () => {
+        if (promptAgeVerification()) {
+          renderVideos(playlistName, videos);
+        }
+      });
+    } else {
+      card.innerHTML = `
+        <video controls src="${url}" preload="metadata"></video>
+        <h3>${title}</h3>
+        <button class="like-btn ${isLiked ? 'liked' : ''}" data-index="${index}" data-playlist="${playlistName}">
+          👍 ${likes}
+        </button>
+      `;
+    }
 
     container.appendChild(card);
   });
@@ -203,3 +219,17 @@ playlistSelect.addEventListener("change", () => {
 
 // 🚀 Start
 loadPlaylists();
+
+// 🔞 Age Verification Helpers
+function checkAgeVerified() {
+  return localStorage.getItem("ageVerified") === "true";
+}
+
+function promptAgeVerification() {
+  const confirmAge = confirm("This content is restricted. Are you 18 or older?");
+  if (confirmAge) {
+    localStorage.setItem("ageVerified", "true");
+    return true;
+  }
+  return false;
+}
