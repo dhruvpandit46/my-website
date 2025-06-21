@@ -75,7 +75,7 @@ async function loadVideos(playlistName) {
     }
 
     const data = docSnap.data();
-    const videos = data.videos || [];
+    const videos = Array.isArray(data.videos) ? data.videos : [];
 
     if (videos.length === 0) {
       videoList.innerHTML = "<p>No videos available in this playlist.</p>";
@@ -89,14 +89,15 @@ async function loadVideos(playlistName) {
   }
 }
 
-// 🎞 Render Filtered or Full Video List
+// 🎞 Render Video Cards
 function renderVideos(playlistName, videos) {
-  videoList.innerHTML = "";
+  // Append to existing (for search), not always overwrite
+  const container = document.createElement("div");
 
   videos.forEach((video, index) => {
-    const title = video.title || "Untitled";
-    const url = video.url || "";
-    const likes = video.likes || 0;
+    const title = video?.title || "Untitled";
+    const url = video?.url || "";
+    const likes = video?.likes || 0;
 
     const likedKey = `liked-${playlistName}-${index}`;
     const isLiked = localStorage.getItem(likedKey) === "true";
@@ -106,22 +107,25 @@ function renderVideos(playlistName, videos) {
     card.innerHTML = `
       <video controls src="${url}" preload="metadata"></video>
       <h3>${title}</h3>
-      <button class="like-btn ${isLiked ? 'liked' : ''}" data-index="${index}">
+      <button class="like-btn ${isLiked ? 'liked' : ''}" data-index="${index}" data-playlist="${playlistName}">
         👍 ${likes}
       </button>
     `;
-    videoList.appendChild(card);
+
+    container.appendChild(card);
   });
 
-  setupLikeEvents(playlistName);
+  videoList.innerHTML = "";
+  videoList.appendChild(container);
+  setupLikeEvents();
 }
 
 // 💖 Setup Like Button Events
-function setupLikeEvents(playlistName) {
+function setupLikeEvents() {
   document.querySelectorAll(".like-btn").forEach((btn) => {
     btn.addEventListener("click", async (e) => {
-      const index = parseInt(e.currentTarget.dataset.index);
-      const btnEl = e.currentTarget;
+      const index = parseInt(btn.dataset.index);
+      const playlistName = btn.dataset.playlist;
       const likedKey = `liked-${playlistName}-${index}`;
 
       if (localStorage.getItem(likedKey) === "true") {
@@ -130,23 +134,24 @@ function setupLikeEvents(playlistName) {
       }
 
       try {
-        btnEl.disabled = true;
+        btn.disabled = true;
 
         const docRef = doc(db, "playlists", playlistName);
         const docSnap = await getDoc(docRef);
-        const updated = docSnap.data().videos || [];
+        const data = docSnap.data();
+        const updated = Array.isArray(data.videos) ? data.videos : [];
 
         updated[index].likes = (updated[index].likes || 0) + 1;
         await updateDoc(docRef, { videos: updated });
 
         localStorage.setItem(likedKey, "true");
-        btnEl.textContent = `👍 ${updated[index].likes}`;
-        btnEl.classList.add("liked");
+        btn.textContent = `👍 ${updated[index].likes}`;
+        btn.classList.add("liked");
       } catch (err) {
         console.error("Failed to like video:", err);
         alert("⚠️ Error while liking the video.");
       } finally {
-        btnEl.disabled = false;
+        btn.disabled = false;
       }
     });
   });
@@ -161,11 +166,13 @@ searchInput.addEventListener("input", () => {
   }
 
   const matches = [];
+
   for (const playlist of allPlaylists) {
-    const filtered = playlist.videos.filter(v =>
-      v.title.toLowerCase().includes(query) || playlist.id.toLowerCase().includes(query)
+    const filtered = playlist.videos.filter(video =>
+      (video?.title || "").toLowerCase().includes(query) ||
+      playlist.id.toLowerCase().includes(query)
     );
-    if (filtered.length) {
+    if (filtered.length > 0) {
       matches.push({ playlist: playlist.id, videos: filtered });
     }
   }
@@ -185,14 +192,14 @@ searchInput.addEventListener("input", () => {
   });
 });
 
-// 🔁 Change Playlist
+// 🔁 Playlist Selector
 playlistSelect.addEventListener("change", () => {
   const selected = playlistSelect.value;
-  if (selected !== currentPlaylist) {
+  if (selected && selected !== currentPlaylist) {
     currentPlaylist = selected;
     loadVideos(selected);
   }
 });
 
-// 🚀 Init
+// 🚀 Start
 loadPlaylists();
