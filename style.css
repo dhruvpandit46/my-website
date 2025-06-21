@@ -172,3 +172,46 @@ footer {
     max-width: 100%;
   }
 }
+
+/* 🔞 Restricted Video Overlay */
+.restricted-card {
+  background: #1a1a1a;
+  border: 1px dashed #ff4b4b;
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  filter: blur(3px);
+  position: relative;
+}
+
+.restricted-card::after {
+  content: "🔞 Restricted Content";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #111;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  color: #ff4b4b;
+  z-index: 2;
+  filter: none;
+}
+
+.verify-age-btn {
+  background: #00d8ff;
+  color: #111;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  margin-top: 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.verify-age-btn:hover {
+  background: #00c6e6;
+}
