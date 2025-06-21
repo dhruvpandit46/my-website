@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <title>🎬 Anique Anime Streaming</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <!-- Fonts for dopamine effect -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  
+
   <!-- External Styles -->
   <link rel="stylesheet" href="style.css" />
 
@@ -15,23 +15,28 @@
   <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      🌀 <span>Anique</span>
-    </div>
-    <div class="playlist-dropdown">
-      <select id="playlistSelect">
-        <option value="">-- Select Playlist --</option>
-      </select>
-    </div>
-  </header>
+  <div class="page-container">
+    <div class="black-block">
+      <header>
+        <div class="logo">🌀 <span>Anique</span></div>
+        <div class="playlist-dropdown">
+          <select id="playlistSelect">
+            <option value="">-- Select Playlist --</option>
+          </select>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="🔍 Search anime or playlist..." />
+        </div>
+      </header>
 
-  <main id="videoList">
-    <!-- 🔄 Dynamic video cards appear here -->
-  </main>
+      <main id="videoList">
+        <!-- 🔄 Dynamic video cards appear here -->
+      </main>
+    </div>
 
-  <footer>
-    <p>© 2025 Anique • For True Anime Fans</p>
-  </footer>
+    <footer>
+      <p>© 2025 Anique • For True Anime Fans</p>
+    </footer>
+  </div>
 </body>
 </html>
